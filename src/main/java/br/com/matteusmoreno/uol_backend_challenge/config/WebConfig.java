@@ -14,8 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:8000",
                         "https://wonderful-moss-03892360f.5.azurestaticapps.net",
                         "https://uol-frontend-challenge-b39qeytao-matteus-morenos-projects.vercel.app")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(false);
+                .allowedMethods("*")
+                .allowedHeaders("*");
     }
 }
