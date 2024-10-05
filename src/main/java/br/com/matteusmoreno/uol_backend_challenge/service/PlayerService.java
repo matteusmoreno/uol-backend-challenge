@@ -14,6 +14,8 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,13 +34,15 @@ public class PlayerService {
     private final ObjectMapper objectMapper;
     private final XmlMapper xmlMapper;
     private final Random random;
+    private final ResourceLoader resourceLoader;
 
     @Autowired
-    public PlayerService(PlayerRepository playerRepository, ObjectMapper objectMapper, XmlMapper xmlMapper, Random random) {
+    public PlayerService(PlayerRepository playerRepository, ObjectMapper objectMapper, XmlMapper xmlMapper, Random random, ResourceLoader resourceLoader) {
         this.playerRepository = playerRepository;
         this.objectMapper = objectMapper;
         this.xmlMapper = xmlMapper;
         this.random = random;
+        this.resourceLoader = resourceLoader;
     }
 
     @Value("${files.avengers-json}")
@@ -85,8 +89,8 @@ public class PlayerService {
     }
 
     private List<String> getAvengersNicknames() throws IOException {
-        Avenger avenger = objectMapper.readValue(new File(avengersFile), Avenger.class);
-        List<String> avengersList = new ArrayList<>(avenger.getVingadores().stream()
+        Resource resource = resourceLoader.getResource(avengersFile);
+        Avenger avenger = objectMapper.readValue(resource.getInputStream(), Avenger.class);        List<String> avengersList = new ArrayList<>(avenger.getVingadores().stream()
                 .map(Nickname::getCodinome)
                 .toList());
 
@@ -98,8 +102,8 @@ public class PlayerService {
     }
 
     private List<String> getJusticeLeagueNicknames() throws IOException {
-        JusticeLeague justiceLeague = xmlMapper.readValue(new File(justiceLeagueFile), JusticeLeague.class);
-        List<String> justiceLeagueList = justiceLeague.getCodinomes();
+        Resource resource = resourceLoader.getResource(justiceLeagueFile);
+        JusticeLeague justiceLeague = xmlMapper.readValue(resource.getInputStream(), JusticeLeague.class);        List<String> justiceLeagueList = justiceLeague.getCodinomes();
 
         for (Player player : playerRepository.findAll()) {
             justiceLeagueList.remove(player.getNickname());
